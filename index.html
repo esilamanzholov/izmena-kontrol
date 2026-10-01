@@ -930,11 +930,18 @@ var WHATSAPP_CONFIG = {
   var leadSent = false;
   for (var i = 0; i < links.length; i++) {
     links[i].setAttribute("href", url);
-    links[i].addEventListener("click", function () {
-      if (leadSent) return;
-      leadSent = true;
-      try { if (window.fbq) fbq("track", "Lead", { content_name: "izmena_kontrol", content_category: getCreative() || "direct" }); } catch (e) {}
-      try { if (window.ym) ym(113203569, "reachGoal", "whatsapp_click"); } catch (e) {}
+    links[i].addEventListener("click", function (ev) {
+      if (!leadSent) {
+        leadSent = true;
+        try { if (window.fbq) fbq("track", "Lead", { content_name: "izmena_kontrol", content_category: getCreative() || "direct" }); } catch (e) {}
+        try { if (window.ym) ym(113203569, "reachGoal", "whatsapp_click"); } catch (e) {}
+      }
+      // На телефоне даем пикселю 400 мс отправить событие до перехода в WhatsApp
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        ev.preventDefault();
+        var target = this.getAttribute("href");
+        setTimeout(function () { window.location.href = target; }, 400);
+      }
     });
   }
 })();
